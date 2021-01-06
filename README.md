@@ -273,6 +273,27 @@ app.get('/list', async (req, res) => {
 });
 ```
 
+### How do I list heros alphabetically?
+
+```js
+const heroes = await Hero.findAll({
+	order: [
+		// column to order by, then "direction"
+		// 'desc' is SQL syntax for descending
+		['name', 'desc'],
+	],
+});
+```
+
 ### Show a form that lists all Sidekicks
+
+Goal: associate a specific Sidekick with a specific Hero
+
+- `app.get('/hero/:id/sidekick')`
+- require Sidekick from models
+- get a list of all the sidekicks
+- res.render() a new template: `form.html`
+- convert that list to dropdown
+  - use the Sidekick id for the value, but show their name
 
 ### Process the form data and associate that Sidekick with that Hero

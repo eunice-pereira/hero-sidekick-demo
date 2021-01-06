@@ -16,17 +16,16 @@ app.set('view engine', 'html');
 const logger = morgan('dev');
 app.use(logger);
 
-const { Hero } = require('./models');
+const { Hero, Sidekick } = require('./models');
 const { layout } = require('./utils');
 app.get('/', (req, res) => {
 	res.send(`hello world!`);
 });
 app.get('/list', async (req, res) => {
-	const heroes = await Hero.findAll();
+	const heroes = await Hero.findAll({
+		order: [['name', 'desc']],
+	});
 
-	// to have data return in JSON object
-	// console.log(JSON.stringify(heroes, null, 4));
-	// res.json(heroes);
 	res.render('list', {
 		locals: {
 			heroes,
@@ -36,6 +35,21 @@ app.get('/list', async (req, res) => {
 
 	// testing we are connecting properly!
 	// res.send('this should be a list of heroes');
+});
+app.get('/hero/:id/sidekick', async (req, res) => {
+	const { id } = req.params;
+	const hero = await Hero.findByPk(id);
+	// get list of sidekicks from DB
+	const sidekicks = await Sidekick.findAll({
+		order: [['name', 'asc']],
+	});
+	res.render('form', {
+		locals: {
+			hero, // chosen from id above
+			sidekicks, // all sidekicks from db
+		},
+		...layout,
+	});
 });
 
 server.listen(port, host, () => {
