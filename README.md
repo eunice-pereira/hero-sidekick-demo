@@ -199,4 +199,80 @@ npx sequelize db:seed:undo:all
 npx sequelize db:seed:all
 ```
 
+---
+
 ## Call Sequelize Models from Controller functions
+
+### List all Heroes
+
+- require Hero Model in index.js
+- call Hero.findAll()
+- res.send() that array back to the browser
+
+```sh
+app.get('/list', async (req, res) => {
+	const heroes = await Hero.findAll();
+
+	// to have data return in JSON object
+	console.log(JSON.stringify(heroes, null, 4));
+	res.json(heroes);
+
+	// testing we are connecting properly!
+	// res.send('this should be a list of heroes');
+});
+```
+
+_Note_: To see a nice version of data in `console.log()`
+
+```js
+console.log(JSON.stringify(heroes, null, 4));
+```
+
+`JSON.stringify()` will take objects and arrays and simple variables (not functions) and will make it a human-readable string.
+
+The `null, 4` arguments are for indentation.
+
+#### Show list in template
+
+1. mkdir `templates`
+   -mkdir `templates/partials` (with header.html and footer.html)
+2. touch `utils.js` with partials "layout" object
+
+- easily include header and footer when I `res.render()`
+
+3. create a template for listing heroes `list.html`
+
+- `.map().join('')` into a String
+
+Once template html files are set up, modify `'/list'` router to render Heroes model 🎉
+
+`list.html`
+
+```sh
+${header}
+<h1>All Heroes!</h1>
+<ul>
+	${ heroes.map(h => `
+	<li>${h.name}</li>
+	`).join('') }
+</ul>
+${footer}
+```
+
+`index.js`
+
+```sh
+app.get('/list', async (req, res) => {
+	const heroes = await Hero.findAll();
+	res.render('list', {
+		locals: {
+			heroes,
+		},
+		...layout,
+	});
+});
+```
+
+### Show a form that lists all Sidekicks
+
+### Process the form data and associate that Sidekick with that Hero
