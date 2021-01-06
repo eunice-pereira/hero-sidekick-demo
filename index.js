@@ -16,13 +16,18 @@ app.set('view engine', 'html');
 const logger = morgan('dev');
 app.use(logger);
 
+app.use(express.urlencoded({ extended: true }));
+
 const { Hero, Sidekick } = require('./models');
 const { layout } = require('./utils');
+const { Op } = require('sequelize');
+
 app.get('/', (req, res) => {
 	res.send(`hello world!`);
 });
 app.get('/list', async (req, res) => {
 	const heroes = await Hero.findAll({
+		include: Sidekick, // once chosen, will include all sidekick info in Hero array
 		order: [['name', 'desc']],
 	});
 
@@ -41,6 +46,12 @@ app.get('/hero/:id/sidekick', async (req, res) => {
 	const hero = await Hero.findByPk(id);
 	// get list of sidekicks from DB
 	const sidekicks = await Sidekick.findAll({
+		// this is so taken sidekicks are no longer shown
+		where: {
+			heroId: {
+				[Op.eq]: null, //remember to require from Sequelize
+			},
+		},
 		order: [['name', 'asc']],
 	});
 	res.render('form', {
@@ -50,6 +61,16 @@ app.get('/hero/:id/sidekick', async (req, res) => {
 		},
 		...layout,
 	});
+});
+app.post('/hero/:id/sidekick', async (req, res) => {
+	const { id } = req.params;
+	const { sidekickId } = req.body;
+
+	const hero = await Hero.findByPk(id);
+	await hero.setSidekick(sidekickId);
+	await hero.save();
+
+	res.redirect('/list');
 });
 
 server.listen(port, host, () => {

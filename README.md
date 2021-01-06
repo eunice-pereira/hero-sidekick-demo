@@ -289,11 +289,65 @@ const heroes = await Hero.findAll({
 
 Goal: associate a specific Sidekick with a specific Hero
 
-- `app.get('/hero/:id/sidekick')`
+- new router: `app.get('/hero/:id/sidekick')`
 - require Sidekick from models
+
+```sh
+const { Hero, Sidekick } = require('./models');
+```
+
 - get a list of all the sidekicks
 - res.render() a new template: `form.html`
 - convert that list to dropdown
   - use the Sidekick id for the value, but show their name
 
 ### Process the form data and associate that Sidekick with that Hero
+
+Router now looks like this:
+
+```sh
+app.get('/hero/:id/sidekick', async (req, res) => {
+	const { id } = req.params;
+	const hero = await Hero.findByPk(id);
+	// get list of sidekicks from DB
+	const sidekicks = await Sidekick.findAll({
+		order: [['name', 'asc']],
+	});
+	res.render('form', {
+		locals: {
+			hero, // chosen from id above
+			sidekicks, // all sidekicks from db
+		},
+		...layout,
+	});
+});
+```
+
+`app.get()` router always needs `app.post()` immediately afterwards when rendering a form
+
+```sh
+app.post('/hero/:id/sidekick', async (req, res) => {
+	const { id } = req.params;
+	const { sidekickId } = req.body;
+
+	const hero = await Hero.findByPk(id);
+	await hero.setSidekick(sidekickId);
+	await hero.save();
+
+	res.redirect('/list');
+});
+```
+
+**Note!** Remember the following code towards top of `index.js` in order for form to render.
+
+```js
+app.use(express.urlencoded({ extended: true }));
+```
+
+### How do I filter out Sidekicks that are already taken?
+
+`Op` contains comparison operators.
+
+```js
+const { Op } = require('sequelize');
+```
