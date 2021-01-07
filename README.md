@@ -338,7 +338,7 @@ app.post('/hero/:id/sidekick', async (req, res) => {
 });
 ```
 
-**Note!** Remember the following code towards top of `index.js` in order for form to render.
+**Note!** Remember the following code towards top of `index.js` in order to use `req.body`.
 
 ```js
 app.use(express.urlencoded({ extended: true }));

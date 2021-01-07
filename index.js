@@ -27,7 +27,10 @@ app.get('/', (req, res) => {
 });
 app.get('/list', async (req, res) => {
 	const heroes = await Hero.findAll({
-		include: Sidekick, // once chosen, will include all sidekick info in Hero array
+		// once chosen, will include all sidekick info in Hero array that prints to console
+		include: Sidekick,
+
+		// will list heroes in descending order in drop down menu
 		order: [['name', 'desc']],
 	});
 
